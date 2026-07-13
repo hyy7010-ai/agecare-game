@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if the user has a specific role (Assuming roles are stored in user profiles)
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Allow RN, Manager, Admin full access
+    function isStaffMember() {
+      return isAuthenticated() && (getUserRole() in ['rn', 'manager', 'admin', 'caregiver', 'family']);
+    }
+    
+    match /residents/{residentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isStaffMember();
+    }
+    
+    match /auditLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAuthenticated() && getUserRole() == 'admin';
+      allow update, delete: if false;
+    }
+    
+    match /dailyCareNotes/{noteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isStaffMember();
+    }
+    
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

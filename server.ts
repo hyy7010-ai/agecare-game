@@ -74,7 +74,9 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   async function generateWithRetry(request: any): Promise<any> {
     const aiClient = getAi();
     const maxRetries = 5;
-    const TIMEOUT_MS = 30000;
+    // Grounded (googleSearch) generations legitimately take longer than a plain
+    // completion; 30s was too short and made the SIRS endpoint time out and 500.
+    const TIMEOUT_MS = 60000;
     
     for (let i = 0; i < maxRetries; i++) {
       let timeoutId: any;

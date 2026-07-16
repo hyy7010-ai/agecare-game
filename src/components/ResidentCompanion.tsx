@@ -12,6 +12,7 @@ import { FlowerMemoryMatch } from "./FlowerMemoryMatch";
 import { loadPreference, savePreference, updatePreferenceFromSession, type ResidentPreference, type ResidentRecommendation } from "../lib/residentPersonalisation";
 import { MemoryJournal, Recommendations } from "./ResidentPersonalisation";
 import { ResidentHome } from "./ResidentHome";
+import { LeisureGames } from "./LeisureGames";
 
 const FLOWERS = [
   { title: "A peaceful rose garden", url: "https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=900&q=80" },
@@ -19,7 +20,7 @@ const FLOWERS = [
   { title: "Sunflowers in the morning", url: "https://images.unsplash.com/photo-1470509037663-253afd7f0f51?auto=format&fit=crop&w=900&q=80" }
 ];
 
-type View = "home" | "chat" | "flowers" | "game" | "memory" | "summary";
+type View = "home" | "chat" | "flowers" | "game" | "leisure" | "memory" | "summary";
 const nowMessage = (role: CompanionMessage["role"], text: string, intent?: CompanionMessage["intent"]): CompanionMessage => ({ id: crypto.randomUUID(), role, text, createdAt: new Date().toISOString(), intent });
 
 export function ResidentCompanion() {
@@ -128,6 +129,7 @@ export function ResidentCompanion() {
       commit({ ...withResident, messages: [...withResident.messages, nowMessage("assistant", data.reply)] });
       if (data.action === "SHOW_FLOWERS") setTimeout(openFlowers, 500);
       if (data.action === "PLAY_FLOWER_MATCH") setTimeout(openGame, 500);
+      if (/sudoku|数独|puzzle|拼图|match.?3|消消乐|连连看|休闲游戏/i.test(text)) setTimeout(() => setView("leisure"), 500);
       if (intent.intent === "SHARE_MEMORY") setTimeout(() => setView("memory"), 500);
       if (/summary|report|小结|总结|报告/i.test(text)) setTimeout(() => setView("summary"), 500);
     } catch {
@@ -135,6 +137,7 @@ export function ResidentCompanion() {
       commit({ ...withResident, messages: [...withResident.messages, nowMessage("assistant", fallback)] });
       setError(language === "zh" ? "AI 服务暂时不可用，已使用安全演示回复。" : "AI service unavailable; using a safe demo reply.");
       if (intent.intent === "PLAY_ACTIVITY" && intent.topic === "flowers") setTimeout(openGame, 500);
+      else if (/sudoku|数独|puzzle|拼图|match.?3|消消乐|连连看|休闲游戏/i.test(text)) setTimeout(() => setView("leisure"), 500);
       else if (intent.intent === "SHARE_MEMORY") setTimeout(() => setView("memory"), 500);
       else if (/summary|report|小结|总结|报告/i.test(text)) setTimeout(() => setView("summary"), 500);
       else if (intent.topic === "flowers") setTimeout(openFlowers, 500);
@@ -164,6 +167,7 @@ export function ResidentCompanion() {
         {view === "chat" && <section className="max-w-3xl mx-auto"><div className="bg-white border-2 border-orange-100 rounded-[2rem] min-h-[360px] p-5 sm:p-8 space-y-4 shadow-sm"><div className="flex gap-3"><span className="w-12 h-12 shrink-0 rounded-full bg-orange-400 text-white flex items-center justify-center"><Sparkles/></span><p className="bg-orange-50 rounded-2xl p-4 text-xl">{language === "zh" ? "您好，Mary。我是 AI 伙伴 Sunny。今天想做什么？" : "Hello Mary. I’m Sunny, an AI companion. What would you like to do?"}</p></div>{session.messages.slice(-8).map(message => <div key={message.id} className={`flex ${message.role === "resident" ? "justify-end" : "justify-start"}`}><div className={`max-w-[85%] rounded-2xl p-4 text-xl leading-relaxed ${message.role === "resident" ? "bg-[#dce8d7]" : "bg-orange-50"}`}>{message.text}</div></div>)}{loading && <div className="flex items-center gap-3 text-lg text-slate-600"><Loader2 className="animate-spin"/> Sunny is thinking…</div>}{error && <p className="text-amber-800 bg-amber-50 p-3 rounded-xl">{error}</p>}</div><form onSubmit={e => { e.preventDefault(); submitMessage(); }} className="mt-4 flex flex-col sm:flex-row gap-3"><label className="sr-only" htmlFor="resident-message">{words.type}</label><input id="resident-message" value={input} onChange={e => setInput(e.target.value)} maxLength={500} placeholder={words.placeholder} className="flex-1 min-h-16 rounded-2xl border-2 border-orange-200 bg-white px-5 text-xl outline-none focus:ring-4 focus:ring-orange-200"/><button disabled={!input.trim() || loading} className="min-h-16 px-7 rounded-2xl bg-orange-500 text-white text-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2"><Send/> {words.send}</button></form></section>}
         {view === "flowers" && <section><div className="flex flex-wrap justify-between items-center gap-3 mb-6"><div><span className="inline-flex px-3 py-1 rounded-full bg-green-100 text-green-800 font-bold mb-2">{words.curated}</span><h1 className="text-4xl font-bold">{language === "zh" ? "为 Mary 精选的花" : "Flowers selected for Mary"}</h1></div><button onClick={finishFlowers} className="min-h-14 px-6 rounded-2xl bg-[#45634f] text-white text-xl font-bold flex items-center gap-2"><X/> {words.close}</button></div><div className="grid md:grid-cols-3 gap-5">{FLOWERS.map(item => <figure key={item.title} className="overflow-hidden rounded-[2rem] bg-white border-2 border-orange-100 shadow-sm"><img src={item.url} alt={item.title} className="h-64 w-full object-cover"/><figcaption className="p-5 text-xl font-bold flex gap-2"><Image className="text-orange-500 shrink-0"/> {item.title}</figcaption></figure>)}</div><p className="mt-5 text-slate-600 text-center">Images: Unsplash · preview only · no autoplay</p></section>}
         {view === "game" && <FlowerMemoryMatch language={language} replayed={session.activities.some(activity => activity.type === "memory_match")} onExit={finishGame} />}
+        {view === "leisure" && <LeisureGames onExit={() => setView("chat")}/>}
         {view === "memory" && <MemoryJournal language={language} profile={preference} session={session} onChange={updatePreference} onTalk={startMemoryPrompt}/>}
         {view === "summary" && <section className="max-w-4xl mx-auto"><h1 className="text-4xl font-bold mb-6">{words.daily}</h1>{session.activities.length === 0 ? <div className="bg-white rounded-3xl p-8 text-xl border-2 border-orange-100">{words.noActivity}</div> : <div className="grid md:grid-cols-2 gap-5"><article className="bg-white rounded-3xl p-7 border-2 border-orange-100"><h2 className="text-2xl font-bold mb-4">{language === "zh" ? "活动记录" : "Activity record"}</h2>{dailySummary.activities.map((activity, i) => <p key={i} className="text-xl mb-3">• {activity.completed ? "✓" : "–"} {activity.topic} · {activity.durationMinutes} min</p>)}<p className="mt-6 text-lg text-slate-600">{dailySummary.followUpSuggestion}</p></article><article className="bg-[#fff0e0] rounded-3xl p-7 border-2 border-orange-200"><h2 className="text-2xl font-bold mb-4">{words.family}</h2><p className="text-xl leading-relaxed">{familySummary}</p><p className="text-sm text-slate-600 mt-6">Demo summary based only on observable activity. No emotion or clinical inference.</p></article></div>}</section>}
         {view === "chat" && <aside className="max-w-3xl mx-auto mt-5 bg-[#fff0cf] border-2 border-[#e3c06e] rounded-3xl p-4 sm:p-5">

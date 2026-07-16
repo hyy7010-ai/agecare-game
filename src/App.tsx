@@ -6,7 +6,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Login } from "./components/Login";
 import { Register } from "./components/Register";
 import { ForgotPassword } from "./components/ForgotPassword";
-import { DashboardContainer } from "./components/DashboardContainer";
+import { RoleHome } from "./components/RoleHome";
 
 export default function App() {
   return (
@@ -21,7 +21,7 @@ export default function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <DashboardContainer />
+                  <RoleHome />
                 </ProtectedRoute>
               }
             />

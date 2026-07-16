@@ -65,6 +65,10 @@ service cloud.firestore {
     match /observations/{docId}    { allow read, write: if isSignedIn(); }
     match /shifts/{docId}          { allow read, write: if isSignedIn(); }
     match /todaySummaries/{docId}  { allow read, write: if isSignedIn(); }
+    match /residentActivitySessions/{docId} { allow read, write: if isSignedIn(); }
+    match /residentDailySummaries/{docId} { allow read, write: if isSignedIn(); }
+    match /residentPreferences/{docId} { allow read, write: if isSignedIn(); }
+    match /residentMemoryJournals/{docId} { allow read, write: if isSignedIn(); }
 
     // ---- User profiles ----
     // A user may create/update their own profile; any signed-in user may read

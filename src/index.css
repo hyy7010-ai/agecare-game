@@ -38,3 +38,9 @@ h1, h2, h3, h4, h5, h6 {
   animation-delay: 2s;
 }
 
+@layer components {
+  .resident-action {
+    @apply min-h-32 rounded-3xl p-6 text-left text-2xl font-bold flex flex-col justify-between gap-5 shadow-sm transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-orange-300;
+  }
+  .resident-action svg { @apply w-9 h-9; }
+}

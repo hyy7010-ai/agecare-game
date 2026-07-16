@@ -1,4 +1,4 @@
-export type UserRole = "caregiver" | "rn" | "manager" | "admin" | "family";
+export type UserRole = "caregiver" | "rn" | "manager" | "admin" | "family" | "resident";
 
 export interface UserProfile {
   uid: string;

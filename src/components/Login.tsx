@@ -14,7 +14,8 @@ import {
   HeartPulse,
   UserCircle,
   Users,
-  Globe
+  Globe,
+  Sun
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -38,6 +39,7 @@ export const Login: React.FC = () => {
       "manager@sunrisecare.com": "manager",
       "family@sunrisecare.com": "family",
       "admin@sunrisecare.com": "admin",
+      "resident@sunrisecare.com": "resident",
     };
 
     if (testAccounts[email] && (password === "password123" || password === "••••••••••••")) {
@@ -91,7 +93,8 @@ export const Login: React.FC = () => {
       rn: "rn@sunrisecare.com",
       manager: "manager@sunrisecare.com",
       family: "family@sunrisecare.com",
-      admin: "admin@sunrisecare.com"
+      admin: "admin@sunrisecare.com",
+      resident: "resident@sunrisecare.com"
     };
     setEmail(emails[role]);
     setPassword("••••••••••••");
@@ -169,6 +172,22 @@ export const Login: React.FC = () => {
           )}
 
           {/* Quick Access */}
+          <button
+            type="button"
+            disabled={loading}
+            onClick={async () => {
+              try {
+                setLoading(true); setError("");
+                await loginAsDemo("resident");
+                navigate("/");
+              } catch { setError(t('err_test_login')); setLoading(false); }
+            }}
+            className="w-full rounded-2xl bg-gradient-to-r from-orange-400 to-amber-400 p-5 text-left text-orange-950 shadow-sm hover:shadow-md transition-all disabled:opacity-50 flex items-center gap-4"
+          >
+            <span className="w-14 h-14 rounded-full bg-white/70 flex items-center justify-center shrink-0"><Sun className="w-8 h-8" /></span>
+            <span><span className="block text-xl font-bold">Resident / 居民 / 长者</span><span className="block mt-1 text-sm font-medium">Enter Mary’s simple AI Companion demo</span></span>
+          </button>
+
           <div className="bg-slate-100 rounded-2xl p-6 border border-slate-200">
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>

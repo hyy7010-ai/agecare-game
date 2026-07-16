@@ -176,6 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       manager: "Michael Thompson",
       admin: "System Admin",
       family: "Mary Smith (Next of Kin)",
+      resident: "Mary",
     };
     const profile: UserProfile = {
       uid: user ? user.uid : `local-${role}`,

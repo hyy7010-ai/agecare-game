@@ -70,6 +70,40 @@ async function startServer() {
     return ai;
   };
 
+  app.post('/api/resident-companion', async (req, res) => {
+    const { message, residentName = 'Mary', language = 'en', intent, recentMessages = [], preferences = {} } = req.body || {};
+    if (typeof message !== 'string' || !message.trim() || message.length > 500) {
+      return res.status(400).json({ error: 'A message between 1 and 500 characters is required.' });
+    }
+
+    const action = intent?.intent === 'PLAY_ACTIVITY' && intent?.topic === 'flowers'
+      ? 'PLAY_FLOWER_MATCH'
+      : intent?.topic === 'flowers' && ['VIEW_IMAGES', 'WATCH_VIDEO'].includes(intent?.intent)
+        ? 'SHOW_FLOWERS' : 'NONE';
+    const demoReply = language === 'zh'
+      ? (action === 'PLAY_FLOWER_MATCH' ? `当然可以，${residentName}。我们来玩花朵配对。` : action === 'SHOW_FLOWERS' ? `当然可以，${residentName}。我为您找到了一些宁静的花园图片。` : `谢谢您告诉我，${residentName}。您想继续聊聊，还是看看花？`)
+      : (action === 'PLAY_FLOWER_MATCH' ? `Of course, ${residentName}. Let's play Flower Memory Match.` : action === 'SHOW_FLOWERS' ? `Of course, ${residentName}. I found some peaceful flower pictures for you.` : `Thank you for telling me, ${residentName}. Would you like to keep talking, or look at some flowers?`);
+
+    // A deterministic response keeps the Phase 1 demo usable without an external
+    // service. When configured, Gemini is called only here so the API key never
+    // reaches the browser.
+    if (!process.env.GEMINI_API_KEY) return res.json({ reply: demoReply, action, mocked: true });
+    try {
+      const response = await generateWithRetry({
+        model: 'gemini-3.5-flash',
+        contents: [{
+          role: 'user',
+          parts: [{ text: `You are Sunny, an AI companion for an older aged-care resident named ${residentName}. You are not human. Use ${language === 'zh' ? 'Simplified Chinese' : 'clear English'}. Use at most 3 short sentences, ask at most one question, be respectful and adult, and make no diagnosis or inferred emotion claims. You may naturally reference only these explicit non-sensitive preferences: ${JSON.stringify(preferences)}. Do not invent preferences. If the user asks for human help or describes immediate danger, say staff are being contacted and do not give medical advice. Intent: ${JSON.stringify(intent)}. Recent conversation: ${JSON.stringify(recentMessages.slice(-6))}. Resident says: ${message}` }]
+        }],
+        config: { temperature: 0.3 }
+      });
+      return res.json({ reply: response.text?.trim() || demoReply, action, mocked: false });
+    } catch (error: any) {
+      console.warn('Resident companion AI fallback:', sanitizeErrorMessage(error?.message));
+      return res.json({ reply: demoReply, action, mocked: true });
+    }
+  });
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   async function generateWithRetry(request: any): Promise<any> {
     const aiClient = getAi();

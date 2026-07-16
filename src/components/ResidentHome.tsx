@@ -1,11 +1,38 @@
 import React from "react";
-import { ArrowRight, BookHeart, Flower2, HelpCircle, MessageCircle, Play, Sparkles } from "lucide-react";
+import { MessageCircle, Sparkles } from "lucide-react";
 
-type Props={language:"en"|"zh";onTalk:()=>void;onFlowers:()=>void;onGame:()=>void;onMemory:()=>void;onHelp:()=>void;onLanguage:()=>void;onLogout:()=>void;syncLabel:string};
-export function ResidentHome(p:Props){const z=p.language==="zh";return <div className="min-h-screen bg-[#fbf7ef] text-[#293a30]">
-<header className="max-w-5xl mx-auto p-5 flex justify-end gap-3"><span className="mr-auto hidden sm:block text-sm font-bold text-[#617067]">{p.syncLabel}</span><button onClick={p.onLanguage} className="px-5 min-h-12 bg-white rounded-full border border-[#ded8ca] font-bold">{z?"English":"中文"}</button><button onClick={p.onLogout} className="px-4 font-bold text-[#617067]">{z?"退出":"Exit"}</button></header>
-<main className="max-w-5xl mx-auto px-5 pb-16"><section className="text-center py-6 sm:py-10"><div className="sunny-breathe mx-auto w-32 h-32 rounded-full bg-[#e7893c] text-white flex items-center justify-center shadow-xl"><Sparkles className="w-16 h-16"/></div><p className="mt-5 text-sm tracking-[.25em] uppercase font-bold text-[#c66f2a]">Sunny Companion</p><h1 className="text-4xl sm:text-6xl font-bold mt-3">{z?"早上好，Mary！":"Good morning, Mary!"}</h1><p className="max-w-2xl mx-auto text-xl sm:text-2xl text-[#5d6e63] mt-4 leading-relaxed">{z?"我记得您喜欢花和园艺。今天想一起度过一些时间吗？":"I remember that you enjoy flowers and gardening. Would you like to spend some time together today?"}</p><button onClick={p.onTalk} className="mt-7 min-h-20 px-10 rounded-full bg-[#d97832] text-white text-2xl font-bold shadow-lg inline-flex items-center gap-3"><MessageCircle className="w-8 h-8"/>{z?"和 Sunny 聊聊":"Talk with Sunny"}</button></section>
-<section><p className="font-bold uppercase tracking-wider text-[#c66f2a]">{z?"为您准备":"Chosen for you"}</p><h2 className="text-4xl font-bold mb-5">{z?"今天的推荐":"Today's recommendations"}</h2>
-<article className="bg-white rounded-[2rem] overflow-hidden border border-[#e8dfd1] shadow-[0_14px_40px_rgba(61,78,66,.08)] grid md:grid-cols-2"><img src="https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1200&q=85" alt="Australian flowers" className="w-full h-64 md:h-full object-cover"/><div className="p-8 sm:p-10"><Flower2 className="w-10 h-10 text-[#52705b] mb-5"/><p className="font-bold text-[#c66f2a]">{z?"今日活动":"Today's activity"}</p><h3 className="text-3xl font-bold mt-2">{z?"漫步澳洲花园":"Visit an Australian Flower Garden"}</h3><p className="text-lg text-[#617067] my-4">{z?"因为您喜欢花和园艺。":"Because you enjoy flowers and gardening."}</p><button onClick={p.onFlowers} className="min-h-14 px-7 rounded-full bg-[#52705b] text-white text-lg font-bold inline-flex items-center gap-2">{z?"开始欣赏":"Explore"}<ArrowRight/></button></div></article>
-<div className="grid md:grid-cols-2 gap-5 mt-5"><article className="rounded-[2rem] bg-[#eaf1e7] p-8"><Play className="w-9 h-9 text-[#52705b]"/><p className="font-bold text-[#52705b] mt-5">{z?"今日游戏":"Today's game"}</p><h3 className="text-3xl font-bold mt-2">{z?"花朵配对":"Flower Memory Match"}</h3><p className="text-lg text-[#617067] my-4">{z?"按自己的节奏配对花朵，没有倒计时。":"Match flowers at your own pace. No timer."}</p><button onClick={p.onGame} className="min-h-14 px-7 rounded-full bg-[#52705b] text-white text-lg font-bold">{z?"开始游戏":"Play"}</button></article><article className="rounded-[2rem] bg-[#fff1e4] p-8"><BookHeart className="w-9 h-9 text-[#d97832]"/><p className="font-bold text-[#c66f2a] mt-5">{z?"今日回忆":"Today's memory"}</p><h3 className="text-3xl font-bold mt-2">{z?"童年的花园":"Your childhood garden"}</h3><p className="text-lg text-[#6f665e] my-4">{z?"愿意告诉 Sunny 您记得的花园吗？":"Tell Sunny about a garden you remember."}</p><button onClick={p.onMemory} className="min-h-14 px-7 rounded-full bg-[#d97832] text-white text-lg font-bold">{z?"分享回忆":"Start"}</button></article></div></section>
-<section className="mt-7 bg-white rounded-[2rem] border border-[#e8dfd1] p-7 flex flex-col sm:flex-row gap-5 items-start sm:items-center"><HelpCircle className="w-10 h-10 text-[#52705b]"/><div className="flex-1"><h2 className="text-2xl font-bold">{z?"需要帮助？":"Need help?"}</h2><p className="text-lg text-[#617067]">{z?"您可以随时请求工作人员。":"You can ask a staff member at any time."}</p></div><button onClick={p.onHelp} className="min-h-14 px-7 rounded-full border-2 border-[#52705b] text-[#405a49] font-bold">{z?"请求工作人员":"Ask staff for help"}</button></section><p className="text-center text-sm text-[#6c786f] mt-8">Sunny is an AI companion, not a person. You are always in control.</p></main></div>}
+interface Props {
+  language: "en" | "zh";
+  onTalk: () => void;
+  onLanguage: () => void;
+  onLogout: () => void;
+  syncLabel: string;
+}
+
+export function ResidentHome({ language, onTalk, onLanguage, onLogout, syncLabel }: Props) {
+  const zh = language === "zh";
+  return <div className="min-h-screen bg-[#fbf7ef] text-[#293a30] flex flex-col">
+    <header className="max-w-5xl w-full mx-auto p-5 flex justify-end items-center gap-3">
+      <span className="mr-auto hidden sm:block text-sm font-bold text-[#617067]">{syncLabel}</span>
+      <button onClick={onLanguage} className="px-5 min-h-12 bg-white rounded-full border border-[#ded8ca] font-bold">{zh ? "English" : "中文"}</button>
+      <button onClick={onLogout} className="px-4 min-h-12 font-bold text-[#617067]">{zh ? "退出" : "Exit"}</button>
+    </header>
+    <main className="flex-1 flex items-center justify-center px-5 pb-20">
+      <section className="text-center max-w-3xl">
+        <div className="sunny-breathe mx-auto w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#e7893c] text-white flex items-center justify-center shadow-[0_24px_65px_rgba(201,112,32,.28)]" aria-label="Sunny AI companion">
+          <Sparkles className="w-20 h-20"/>
+        </div>
+        <p className="mt-7 text-sm tracking-[.25em] uppercase font-bold text-[#c66f2a]">Sunny Companion</p>
+        <h1 className="text-4xl sm:text-6xl font-bold mt-4">{zh ? "早上好，Mary！" : "Good morning, Mary!"}</h1>
+        <p className="text-xl sm:text-2xl text-[#5d6e63] mt-5 leading-relaxed">
+          {zh ? "我记得您喜欢花和园艺。告诉我今天想做什么，我会陪您一起。" : "I remember that you enjoy flowers and gardening. Tell me what you would like to do, and I’ll help you find it."}
+        </p>
+        <button onClick={onTalk} className="mt-9 min-h-20 px-11 rounded-full bg-[#d97832] hover:bg-[#c96928] text-white text-2xl font-bold shadow-[0_14px_34px_rgba(190,99,35,.26)] inline-flex items-center gap-3 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#f2c69f]">
+          <MessageCircle className="w-8 h-8"/>{zh ? "和 Sunny 聊聊" : "Talk with Sunny"}
+        </button>
+        <p className="mt-8 text-base text-[#6c786f]">{zh ? "您可以说：我想看花、玩游戏、分享回忆，或者请求帮助。" : "You can ask to see flowers, play a game, share a memory, view your summary, or get help."}</p>
+        <p className="mt-4 text-sm text-[#78847c]">Sunny is an AI companion, not a person. You are always in control.</p>
+      </section>
+    </main>
+  </div>;
+}

@@ -128,18 +128,22 @@ export function ResidentCompanion() {
       commit({ ...withResident, messages: [...withResident.messages, nowMessage("assistant", data.reply)] });
       if (data.action === "SHOW_FLOWERS") setTimeout(openFlowers, 500);
       if (data.action === "PLAY_FLOWER_MATCH") setTimeout(openGame, 500);
+      if (intent.intent === "SHARE_MEMORY") setTimeout(() => setView("memory"), 500);
+      if (/summary|report|小结|总结|报告/i.test(text)) setTimeout(() => setView("summary"), 500);
     } catch {
       const fallback = intent.topic === "flowers" ? (language === "zh" ? "当然可以，Mary。这里有一些宁静的花园图片。" : "Of course, Mary. I found some peaceful flower pictures for you.") : (language === "zh" ? "我现在无法连接。我们可以稍后再试，或者看看花。" : "I cannot connect just now. We can try again, or look at some flowers.");
       commit({ ...withResident, messages: [...withResident.messages, nowMessage("assistant", fallback)] });
       setError(language === "zh" ? "AI 服务暂时不可用，已使用安全演示回复。" : "AI service unavailable; using a safe demo reply.");
       if (intent.intent === "PLAY_ACTIVITY" && intent.topic === "flowers") setTimeout(openGame, 500);
+      else if (intent.intent === "SHARE_MEMORY") setTimeout(() => setView("memory"), 500);
+      else if (/summary|report|小结|总结|报告/i.test(text)) setTimeout(() => setView("summary"), 500);
       else if (intent.topic === "flowers") setTimeout(openFlowers, 500);
     } finally { setLoading(false); }
   };
 
   if (assistance) return <div className="min-h-screen bg-red-50 flex items-center justify-center p-6"><div role="alert" className="max-w-xl w-full bg-white border-4 border-red-500 rounded-[2rem] p-8 text-center shadow-xl"><HelpCircle className="w-20 h-20 text-red-600 mx-auto mb-5"/><h1 className="text-4xl font-bold text-red-900 mb-4">{words.assistance}</h1><p className="text-xl leading-relaxed text-slate-700 mb-8">{words.assistanceBody}</p><button onClick={() => setAssistance(false)} className="min-h-16 w-full rounded-2xl bg-red-600 text-white text-xl font-bold">{words.dismiss}</button></div></div>;
 
-  if (view === "home") return <ResidentHome language={language} onTalk={() => setView("chat")} onFlowers={openFlowers} onGame={openGame} onMemory={() => setView("memory")} onHelp={() => setAssistance(true)} onLanguage={() => { const next = language === "en" ? "zh" : "en"; setLanguage(next); updatePreference({ ...preference, preferredLanguage: next }); }} onLogout={() => logout()} syncLabel={words[syncState]}/>;
+  if (view === "home") return <ResidentHome language={language} onTalk={() => setView("chat")} onLanguage={() => { const next = language === "en" ? "zh" : "en"; setLanguage(next); updatePreference({ ...preference, preferredLanguage: next }); }} onLogout={() => logout()} syncLabel={words[syncState]}/>;
 
   return (
     <div className="min-h-screen bg-[#fbf7ef] text-[#28382f] font-sans">

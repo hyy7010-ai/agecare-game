@@ -37,6 +37,9 @@ h1, h2, h3, h4, h5, h6 {
 .animation-delay-2000 {
   animation-delay: 2s;
 }
+@keyframes sunny-breathe { 0%,100%{transform:scale(1)} 50%{transform:scale(1.045)} }
+.sunny-breathe { animation:sunny-breathe 3.2s ease-in-out infinite; }
+@media (prefers-reduced-motion:reduce){.sunny-breathe{animation:none}}
 
 @layer components {
   .resident-action {

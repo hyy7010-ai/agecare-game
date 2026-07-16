@@ -5,6 +5,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // GitHub Pages serves this repository from /agecare-game/. Local and
+    // full-stack deployments continue to use the root path.
+    base: process.env.GITHUB_ACTIONS ? '/agecare-game/' : '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

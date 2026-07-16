@@ -37,6 +37,14 @@ The React/Vite frontend provides a polished interface for:
 - **Backend**: Express.js (Node.js), `@google/genai` SDK
 - **Database**: Firebase Firestore (for simulated real-time data syncing and note persistence)
 
+## Resident game interaction model
+
+All future production resident games use a two-screen model: the desktop or tablet displays the
+immersive game world, while the resident's smartphone acts as a one- or two-button accessible
+controller. Existing mouse-based browser games are prototypes, not final resident experiences.
+See [GAME_CONTROLLER_ARCHITECTURE.md](./GAME_CONTROLLER_ARCHITECTURE.md) for the product contract,
+accessibility rules, session lifecycle, and implementation boundary.
+
 ## Data Governance & Privacy
 - This application processes simulated, non-identifiable patient data. 
 - In a production environment, AI processing would require explicit consent frameworks compliant with the Australian Privacy Principles (APPs).

@@ -7,6 +7,7 @@ import { Login } from "./components/Login";
 import { Register } from "./components/Register";
 import { ForgotPassword } from "./components/ForgotPassword";
 import { RoleHome } from "./components/RoleHome";
+import { FlowerMatchController } from "./components/FlowerMatchController";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
           <Routes>
+            <Route path="/controller/flower-match" element={<FlowerMatchController />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

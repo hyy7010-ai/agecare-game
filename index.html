@@ -1,41 +1,23 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/agecare-game/favicon.svg" />
-    <link rel="apple-touch-icon" href="/agecare-game/favicon.svg" />
-    <link rel="manifest" href="/agecare-game/manifest.json" />
-    <meta name="theme-color" content="#059669" />
-    <title>Sunrise Care</title>
-    <script>
-      window.addEventListener('error', function(e) {
-        if (e.message === 'Script error.' || e.message === 'Script error') {
-          e.stopImmediatePropagation();
-          e.preventDefault();
-        }
-      }, true);
-    </script>
-    <script type="module" crossorigin src="/agecare-game/assets/index-DoOfBxXC.js"></script>
-    <link rel="modulepreload" crossorigin href="/agecare-game/assets/vendor-react-DAxbO7zE.js">
-    <link rel="modulepreload" crossorigin href="/agecare-game/assets/vendor-firebase-bsiXze9l.js">
-    <link rel="modulepreload" crossorigin href="/agecare-game/assets/vendor-icons-CzBf9QGU.js">
-    <link rel="modulepreload" crossorigin href="/agecare-game/assets/vendor-charts-eN3GOWuy.js">
-    <link rel="stylesheet" crossorigin href="/agecare-game/assets/index-D-yPSCQ_.css">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('SW registered: ', registration);
-          }).catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
-          });
-        });
-      }
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f8f5ed" />
+  <meta name="description" content="MOMENT — a warm interactive companion for older adults." />
+  <title>MOMENT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="sensor.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="guided.css" />
+  <link rel="stylesheet" href="feedback.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script src="vendor/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
-

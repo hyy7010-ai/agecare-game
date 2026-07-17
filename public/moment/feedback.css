@@ -1,0 +1,7 @@
+.practice-feedback{position:absolute;right:4%;bottom:5%;display:flex;align-items:center;gap:13px;min-width:310px;padding:17px 20px;border-radius:20px;box-shadow:0 14px 34px rgba(50,65,43,.16);animation:message-in .25s ease both}
+.practice-feedback.correct{background:#e1efda;color:#285236}.practice-feedback.wrong{background:#fff0dc;color:#8a5129}.practice-feedback>.icon{width:2.1em;height:2.1em}.practice-feedback span{display:grid}.practice-feedback b{font-size:1.05rem}.practice-feedback small{max-width:300px;line-height:1.35}
+.tutorial-scene.correct .tutorial-motion>span,.practice-phone.correct .motion-demo{background:#e1efda;color:#37714a;box-shadow:0 0 0 12px rgba(111,158,105,.12),var(--shadow)}
+.tutorial-scene.wrong .tutorial-motion>span,.practice-phone.wrong .motion-demo{background:#fff0dc;color:#b26831;animation:gentle-shake .4s ease}
+.phone-success{width:100%;margin:8px 0 16px;padding:14px;border-radius:16px;background:#e1efda;color:#285236;font-weight:900}
+@keyframes gentle-shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media(max-width:700px){.practice-feedback{position:relative;right:auto;bottom:auto;margin:15px;min-width:0}.tutorial-scene{padding-bottom:20px}}

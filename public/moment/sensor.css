@@ -1,0 +1,7 @@
+.motion-readout{width:100%;margin:18px 0;padding:16px;background:#263c27;color:#fff;border-radius:20px;box-shadow:0 12px 25px rgba(38,60,39,.16)}
+.motion-readout header{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.motion-readout header span{font-size:.72rem;color:#cfe0c8}
+.motion-readout>div{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.motion-readout label{display:grid;gap:2px;padding:10px 6px;border-radius:12px;background:rgba(255,255,255,.09);font-size:.72rem;color:#cfe0c8}
+.motion-readout strong{font-variant-numeric:tabular-nums;font-size:1.2rem;color:#fff}
+.practice-phone .motion-readout{margin:4px 0 16px}

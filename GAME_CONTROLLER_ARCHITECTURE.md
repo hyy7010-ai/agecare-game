@@ -73,6 +73,8 @@ architecture and must not be presented as final resident controller games until 
 - Controller actions: two primary buttons, each at least 112px high in tested phone layouts.
 - Orientation checks: 390 × 844 portrait and 844 × 390 landscape, with no viewport overflow.
 - Pairing/reconnect/duplicate/expiry/exit states: implemented and covered by session-store tests.
+- Transport security: same-origin endpoints, expiring random IDs, pairing-code verification, input
+  validation, no-store responses and per-client request limits.
 - Normal play on the large display does not require mouse or touch input.
 
 ## Ready-for-build checklist

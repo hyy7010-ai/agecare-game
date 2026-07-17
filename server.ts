@@ -17,6 +17,7 @@ type MomentSession = {
 
 const momentSessions = new Map<string, MomentSession>();
 const residentGameSessions = new ResidentGameSessionStore();
+const residentGameRequestWindows = new Map<string, { count: number; resetsAt: number }>();
 
 // Set up Multer for handling file uploads (in memory)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -117,14 +118,18 @@ async function startServer() {
   // Production-shaped resident game transport. Unlike the MOMENT demo adapter,
   // this endpoint has an explicit handshake, expiring random IDs, ordered
   // idempotent events and controller heartbeat/reconnect state.
-  app.use('/api/game-sessions', (_req, res, next) => {
+  app.use('/api/game-sessions', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'content-type');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const window = residentGameRequestWindows.get(key);
+    if (!window || now >= window.resetsAt) residentGameRequestWindows.set(key, { count: 1, resetsAt: now + 60_000 });
+    else {
+      window.count += 1;
+      if (window.count > 180) return res.status(429).json({ error: 'Please wait a moment before trying again' });
+    }
     next();
   });
-  app.options('/api/game-sessions/*', (_req, res) => res.sendStatus(204));
   app.post('/api/game-sessions', (req, res) => {
     if (req.body?.gameId && req.body.gameId !== 'flower-memory') return res.status(400).json({ error: 'Unsupported game' });
     const session = residentGameSessions.create();

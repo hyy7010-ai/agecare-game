@@ -56,10 +56,26 @@ rate limits. No raw audio or device sensor data is stored.
 
 ## Current implementation status
 
-The existing browser-click games are interaction prototypes. They do **not** satisfy this production
-architecture and must not be presented as final resident controller games. Phone pairing, transport,
-controller pages, and new game worlds are intentionally not implemented in this architecture-only
-change.
+**Flower Memory Match now implements this architecture end to end.** Its large display creates an
+expiring session and pauses until a phone completes the QR/pairing-code handshake. The phone route
+`/controller/flower-match` provides two actions (`Next flower` and `Choose flower`) plus a separated
+Exit control. Events carry the random session ID and an increasing sequence number; duplicate
+delivery is acknowledged without replaying the action. Heartbeats move the display into a gentle
+reconnecting state when the phone is unavailable and restore the session when it returns.
+
+The other browser-click games remain interaction prototypes. They do **not** satisfy this production
+architecture and must not be presented as final resident controller games until each is migrated.
+
+### Flower Memory implementation evidence
+
+- Separate display and controller: `FlowerMemoryMatch.tsx` and `FlowerMatchController.tsx`.
+- Session transport: `/api/game-sessions` routes backed by `ResidentGameSessionStore`.
+- Controller actions: two primary buttons, each at least 112px high in tested phone layouts.
+- Orientation checks: 390 × 844 portrait and 844 × 390 landscape, with no viewport overflow.
+- Pairing/reconnect/duplicate/expiry/exit states: implemented and covered by session-store tests.
+- Transport security: same-origin endpoints, expiring random IDs, pairing-code verification, input
+  validation, no-store responses and per-client request limits.
+- Normal play on the large display does not require mouse or touch input.
 
 ## Ready-for-build checklist
 

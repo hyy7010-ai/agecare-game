@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import multer from 'multer';
 import os from 'os';
+import { ResidentGameSessionStore, type ResidentControllerEvent } from './src/lib/residentGameSessions';
 
 type MomentSession = {
   id: string;
@@ -15,6 +16,8 @@ type MomentSession = {
 };
 
 const momentSessions = new Map<string, MomentSession>();
+const residentGameSessions = new ResidentGameSessionStore();
+const residentGameRequestWindows = new Map<string, { count: number; resetsAt: number }>();
 
 // Set up Multer for handling file uploads (in memory)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -109,6 +112,80 @@ async function startServer() {
     if (!session) return res.status(404).json({ error: 'Session not found' });
     session.event = String(req.body?.event || '');
     session.updated = Date.now();
+    res.json(session);
+  });
+
+  // Production-shaped resident game transport. Unlike the MOMENT demo adapter,
+  // this endpoint has an explicit handshake, expiring random IDs, ordered
+  // idempotent events and controller heartbeat/reconnect state.
+  app.use('/api/game-sessions', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const window = residentGameRequestWindows.get(key);
+    if (!window || now >= window.resetsAt) residentGameRequestWindows.set(key, { count: 1, resetsAt: now + 60_000 });
+    else {
+      window.count += 1;
+      if (window.count > 180) return res.status(429).json({ error: 'Please wait a moment before trying again' });
+    }
+    next();
+  });
+  app.post('/api/game-sessions', (req, res) => {
+    if (req.body?.gameId && req.body.gameId !== 'flower-memory') return res.status(400).json({ error: 'Unsupported game' });
+    const session = residentGameSessions.create();
+    const host = req.get('host') || '';
+    const forwarded = req.get('x-forwarded-proto');
+    const localIp = Object.values(os.networkInterfaces()).flat()
+      .find((address) => address?.family === 'IPv4' && !address.internal)?.address || 'localhost';
+    const phoneBase = /^(localhost|127\.0\.0\.1)/.test(host)
+      ? `http://${localIp}:${host.split(':')[1] || PORT}`
+      : `${forwarded || req.protocol}://${host}`;
+    const rawBasePath = String(req.body?.basePath || '/');
+    const basePath = rawBasePath.startsWith('/') && !rawBasePath.includes('..') ? rawBasePath : '/';
+    res.status(201).json({
+      ...session,
+      controllerUrl: `${phoneBase}${basePath.replace(/\/$/, '')}/controller/flower-match?session=${encodeURIComponent(session.sessionId)}&code=${session.pairingCode}`,
+    });
+  });
+  app.get('/api/game-sessions/:id', (req, res) => {
+    const after = Math.max(0, Number(req.query.afterSequence) || 0);
+    const role = req.query.role === 'controller' ? 'controller' : 'display';
+    const session = residentGameSessions.get(req.params.id, after, role);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    res.json(session);
+  });
+  app.post('/api/game-sessions/:id/join', (req, res) => {
+    const session = residentGameSessions.join(req.params.id, String(req.body?.pairingCode || ''));
+    if (!session) return res.status(404).json({ error: 'Pairing code or session not found' });
+    res.json(session);
+  });
+  app.post('/api/game-sessions/:id/heartbeat', (req, res) => {
+    const role = req.body?.role === 'display' ? 'display' : 'controller';
+    const session = residentGameSessions.heartbeat(req.params.id, role);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    res.json(session);
+  });
+  app.post('/api/game-sessions/:id/events', (req, res) => {
+    const actionId = String(req.body?.actionId || '');
+    if (!['next-card', 'choose-card', 'exit'].includes(actionId)) return res.status(400).json({ error: 'Unsupported action' });
+    const event: ResidentControllerEvent = {
+      sessionId: String(req.body?.sessionId || ''),
+      actionId: actionId as ResidentControllerEvent['actionId'],
+      sequence: Number(req.body?.sequence),
+      occurredAt: String(req.body?.occurredAt || new Date().toISOString()),
+    };
+    if (!Number.isInteger(event.sequence) || event.sequence < 1) return res.status(400).json({ error: 'A positive sequence number is required' });
+    try {
+      const result = residentGameSessions.addEvent(req.params.id, event);
+      if (!result) return res.status(404).json({ error: 'Session not found' });
+      res.json({ acceptedSequence: result.snapshot.lastSequence, duplicate: result.duplicate, connectionState: result.snapshot.connectionState });
+    } catch (error) {
+      res.status(409).json({ error: error instanceof Error ? error.message : 'Out-of-order event' });
+    }
+  });
+  app.post('/api/game-sessions/:id/end', (req, res) => {
+    const session = residentGameSessions.end(req.params.id);
+    if (!session) return res.status(404).json({ error: 'Session not found' });
     res.json(session);
   });
 

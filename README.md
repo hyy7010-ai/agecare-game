@@ -57,3 +57,16 @@ accessibility rules, session lifecycle, and implementation boundary.
 3. Start the application: \`npm run dev\`
 
 (The application runs full-stack with a Vite middleware over an Express server on port 3000).
+# MOMENT companion experience
+
+The repository now includes the complete MOMENT older-adult companionship demo at:
+
+```text
+/moment/index.html
+```
+
+Run the full paired-device version locally with `npm run dev`, then open
+`http://localhost:3000/moment/index.html`. The Express server provides the
+`/api/session` endpoints used by QR pairing and phone motion events. Static
+GitHub Pages can display the MOMENT interface, but real cross-device pairing
+requires the Express deployment (or a future realtime backend such as Supabase).

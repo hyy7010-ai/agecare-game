@@ -1,5 +1,5 @@
 import React from "react";
-import { MessageCircle, Sparkles } from "lucide-react";
+import { MessageCircle, Sparkles, Sun } from "lucide-react";
 
 interface Props {
   language: "en" | "zh";
@@ -30,6 +30,9 @@ export function ResidentHome({ language, onTalk, onLanguage, onLogout, syncLabel
         <button onClick={onTalk} className="mt-9 min-h-20 px-11 rounded-full bg-[#d97832] hover:bg-[#c96928] text-white text-2xl font-bold shadow-[0_14px_34px_rgba(190,99,35,.26)] inline-flex items-center gap-3 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#f2c69f]">
           <MessageCircle className="w-8 h-8"/>{zh ? "和 Sunny 聊聊" : "Talk with Sunny"}
         </button>
+        <a href={`${import.meta.env.BASE_URL}moment/index.html`} className="mt-4 min-h-16 px-9 rounded-full bg-[#335436] hover:bg-[#284629] text-white text-xl font-bold shadow-[0_12px_28px_rgba(51,84,54,.22)] inline-flex items-center gap-3 transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#dce6ce]">
+          <Sun className="w-7 h-7"/>{zh ? "打开 MOMENT 湖边体验" : "Open the MOMENT experience"}
+        </a>
         <p className="mt-8 text-base text-[#6c786f]">{zh ? "您可以说：我想看花、玩游戏、分享回忆，或者请求帮助。" : "You can ask to see flowers, play a game, share a memory, view your summary, or get help."}</p>
         <p className="mt-4 text-sm text-[#78847c]">Sunny is an AI companion, not a person. You are always in control.</p>
       </section>

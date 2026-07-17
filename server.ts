@@ -4,6 +4,17 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
 import multer from 'multer';
+import os from 'os';
+
+type MomentSession = {
+  id: string;
+  connected: boolean;
+  event: string | null;
+  updated: number;
+  phoneBase: string;
+};
+
+const momentSessions = new Map<string, MomentSession>();
 
 // Set up Multer for handling file uploads (in memory)
 const upload = multer({ storage: multer.memoryStorage() });
@@ -57,6 +68,49 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
   
   app.use(express.json({ limit: '25mb' }));
+
+  // MOMENT paired-device sessions. The large screen polls this lightweight
+  // endpoint while the phone posts movement events after scanning its QR code.
+  app.use('/api/session', (_req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'content-type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    next();
+  });
+  app.options('/api/session/*', (_req, res) => res.sendStatus(204));
+  app.post('/api/session', (req, res) => {
+    const id = Math.random().toString(36).slice(2, 6).toUpperCase();
+    const host = req.get('host') || '';
+    const forwarded = req.get('x-forwarded-proto');
+    const localIp = Object.values(os.networkInterfaces()).flat()
+      .find((address) => address?.family === 'IPv4' && !address.internal)?.address || 'localhost';
+    const phoneBase = /^(localhost|127\.0\.0\.1)/.test(host)
+      ? `http://${localIp}:${host.split(':')[1] || PORT}`
+      : `${forwarded || req.protocol}://${host}`;
+    const session: MomentSession = { id, connected: false, event: null, updated: Date.now(), phoneBase };
+    momentSessions.set(id, session);
+    res.json({ id, phoneBase });
+  });
+  app.get('/api/session/:id', (req, res) => {
+    const session = momentSessions.get(req.params.id.toUpperCase());
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    res.json(session);
+  });
+  app.post('/api/session/:id/connect', (req, res) => {
+    const session = momentSessions.get(req.params.id.toUpperCase());
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    session.connected = true;
+    session.event = 'connected';
+    session.updated = Date.now();
+    res.json(session);
+  });
+  app.post('/api/session/:id/event', (req, res) => {
+    const session = momentSessions.get(req.params.id.toUpperCase());
+    if (!session) return res.status(404).json({ error: 'Session not found' });
+    session.event = String(req.body?.event || '');
+    session.updated = Date.now();
+    res.json(session);
+  });
 
   // Initialize Gemini lazy
   let ai: GoogleGenAI | null = null;

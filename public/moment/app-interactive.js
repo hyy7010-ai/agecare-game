@@ -163,10 +163,23 @@ function render(){
  const pages={welcome,activities,fishing,fishingIntro,tutorial,conversation,fishingReport,guidedMoment,momentPlaying,momentComplete,memory,explore:()=>experience('explore'),talk:()=>experience('talk'),relax:()=>experience('relax'),listening,pairing,daily:()=>reports(false),weekly:()=>reports(true),family,settings,demo,loading,error};
  app.innerHTML=state.controller?phone():(pages[state.view]||welcome)();
  if(!state.controller&&state.view==='pairing') preparePairing();
+ if(!state.controller&&state.view==='fishing') requestAnimationFrame(alignFishingLine);
  bindMotionPermissionButton();
  updateMotionReadout();
  window.scrollTo(0,0);
 }
+
+function alignFishingLine(){
+ const scene=document.querySelector('.fishing-scene'),rod=scene?.querySelector('.rod'),path=scene?.querySelector('.line path');
+ if(!scene||!rod||!path)return;
+ const style=getComputedStyle(rod),match=style.transform.match(/matrix\(([^)]+)\)/);
+ const values=(match?match[1]:'1,0,0,1,0,0').split(',').map(Number),origin=style.transformOrigin.split(' ').map(value=>Number.parseFloat(value));
+ const [a,b,c,d]=values,ox=rod.offsetLeft+origin[0],oy=rod.offsetTop+origin[1],vx=rod.offsetWidth-origin[0],vy=rod.offsetHeight/2-origin[1];
+ const tipX=ox+a*vx+c*vy,tipY=oy+b*vx+d*vy,startX=tipX/scene.clientWidth*1000,startY=tipY/scene.clientHeight*600;
+ const endX=720,endY=392,controlX=startX+(endX-startX)*.55,controlY=Math.min(startY+50,endY-38);
+ path.setAttribute('d',`M${startX.toFixed(1)},${startY.toFixed(1)} Q${controlX.toFixed(1)},${controlY.toFixed(1)} ${endX},${endY}`);
+}
+window.addEventListener('resize',()=>{if(state.view==='fishing')requestAnimationFrame(alignFishingLine)});
 
 document.addEventListener('click', e=>{
  const go=e.target.closest('[data-go]'); if(go){ state.previous=state.view; state.view=go.dataset.go; render(); return; }

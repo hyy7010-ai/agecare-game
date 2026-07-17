@@ -5,3 +5,8 @@
 .phone-success{width:100%;margin:8px 0 16px;padding:14px;border-radius:16px;background:#e1efda;color:#285236;font-weight:900}
 @keyframes gentle-shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 @media(max-width:700px){.practice-feedback{position:relative;right:auto;bottom:auto;margin:15px;min-width:0}.tutorial-scene{padding-bottom:20px}}
+
+/* Six gentle lake visitors share one illustration so the established fishing art remains cohesive. */
+.fishing-scene .fish4{top:69%;left:15%;width:82px;animation-delay:-3s;animation-duration:14s}.fishing-scene .fish4 img{filter:hue-rotate(310deg) saturate(.88) brightness(1.08)}
+.fishing-scene .fish5{top:52%;left:78%;width:72px;animation-delay:-10s;animation-duration:17s}.fishing-scene .fish5 img{filter:hue-rotate(88deg) saturate(.65) brightness(.98)}
+.fishing-scene .fish6{top:73%;left:43%;width:68px;animation-delay:-7s;animation-duration:16s}.fishing-scene .fish6 img{filter:hue-rotate(215deg) saturate(.72) brightness(.96)}

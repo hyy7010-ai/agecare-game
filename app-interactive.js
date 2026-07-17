@@ -1,10 +1,18 @@
 const app = document.querySelector('#app');
+const FISH_TYPES=[
+ {name:'Sunny Orange Fish',class:'',rarity:.30},
+ {name:'River Blue Fish',class:'blue',rarity:.22},
+ {name:'Rose Petal Fish',class:'rose',rarity:.17},
+ {name:'Jade Garden Fish',class:'jade',rarity:.14},
+ {name:'Moonlight Violet Fish',class:'violet',rarity:.10},
+ {name:'Golden Lotus Fish',class:'yellow',rarity:.07}
+];
 
 const state = {
   view: 'welcome', previous: 'welcome', name: 'Mary', controller: false,
   session: { id:null, connected:false }, controllerStep:'connect', tutorialStep:0, tutorialFeedback:null,
   motion: { enabled:false, permission:'unknown', baseline:null, lastEvent:0 },
-  fishing: { stage: 'ready', caught: 0, bait: 3, progress: 0, started:null },
+  fishing: { stage: 'ready', caught: 0, bait: 3, progress: 0, started:null, activeFish:null },
   memory: { open: [], matched: [], moves: 0, hints: 1, seconds: 155, locked: false },
   settings: { sound: true, motion: true, text: 'Comfortable' },
   staticDemo: location.hostname.endsWith('github.io'), momentStarted: null
@@ -70,11 +78,11 @@ function activities(){
 function activityHeader(title, subtitle, metric){ return `<header class="activity-header">${back()}<div><h1>${title}</h1><p>${subtitle}</p></div>${metric}</header>`; }
 
 function fishing(){
- const f=state.fishing; const instruction = {ready:'A lovely day for fishing — cast your line when you’re ready',waiting:'Let’s wait patiently for a little fish to visit',bite:'Something is nibbling! Lift your phone gently',left:'Our little fish is swimming left — tilt gently',right:'Now it’s swimming right — follow it slowly',reeling:'Turn your phone gently to bring our visitor closer',caught:'Wonderful! You caught a beautiful Golden Lotus Fish'}[f.stage];
- const dialogue={ready:`Let’s go fishing together,<br>${state.name}.`,waiting:'The lake is so peaceful today.<br>Let’s see who comes to visit.',bite:'Oh! I think a little fish<br>is interested in our bait.',left:'The fish is swimming left.<br>You’re doing wonderfully.',right:'Now gently to the right.<br>Perfect — you’ve got it.',reeling:'Turn slowly and gently.<br>It’s almost here!',caught:'What a beautiful little fish!<br>You did a wonderful job.'}[f.stage];
+ const f=state.fishing,visitor=f.activeFish||FISH_TYPES[0]; const instruction = {ready:'A lovely day for fishing — cast your line when you’re ready',waiting:'Let’s wait patiently for a little fish to visit',bite:'Something is nibbling! Lift your phone gently',left:'Our little fish is swimming left — tilt gently',right:'Now it’s swimming right — follow it slowly',reeling:'Turn your phone gently to bring our visitor closer',caught:`Wonderful! You welcomed a ${visitor.name}`}[f.stage];
+ const dialogue={ready:`Let’s go fishing together,<br>${state.name}.`,waiting:'The lake is so peaceful today.<br>Let’s see who comes to visit.',bite:'Oh! I think a little fish<br>is interested in our bait.',left:'The fish is swimming left.<br>You’re doing wonderfully.',right:'Now gently to the right.<br>Perfect — you’ve got it.',reeling:'Turn slowly and gently.<br>It’s almost here!',caught:visitor.name==='Golden Lotus Fish'?'A Golden Lotus Fish!<br>What a very special visitor.':`What a beautiful ${visitor.name}!<br>You did a wonderful job.`}[f.stage];
  const linePath={ready:'M526,230 Q625,265 720,392',waiting:'M526,230 Q625,265 720,392',bite:'M579,258 Q650,285 720,392',left:'M526,230 Q625,265 720,392',right:'M526,230 Q625,265 720,392',reeling:'M422,206 Q565,245 720,392',caught:'M422,206 Q565,245 720,392'}[f.stage];
  return shell(`${activityHeader('Sunny’s Peaceful Fishing','Enjoy a peaceful day by the lake and see what fish you can discover today.',`<div class="metric">${icon('lotus')}<small>Little visitors</small><b>${f.caught}</b></div>`)}
- <section class="fishing-scene" data-fish-scene><div class="ambient-light"></div><div class="cloud-soft cloud-a"></div><div class="cloud-soft cloud-b"></div><div class="water-sheen"></div><div class="butterfly"><i></i><i></i></div><div class="fish fish1"><img src="assets/art/fish-orange.png" alt=""></div><div class="fish fish2 blue"><img src="assets/art/fish-orange.png" alt=""></div><div class="fish fish3 yellow"><img src="assets/art/fish-orange.png" alt=""></div><span class="ripples ripple-one"></span><span class="ripples ripple-two"></span><div class="dock"><i></i><i></i></div><div class="rod ${f.stage}"><i class="reel"></i><i class="handle"></i></div><svg class="line" viewBox="0 0 1000 600" preserveAspectRatio="none"><path d="${linePath}"/></svg>
+ <section class="fishing-scene" data-fish-scene><div class="ambient-light"></div><div class="cloud-soft cloud-a"></div><div class="cloud-soft cloud-b"></div><div class="water-sheen"></div><div class="butterfly"><i></i><i></i></div><div class="fish fish1"><img src="assets/art/fish-orange.png" alt="Sunny Orange Fish"></div><div class="fish fish2 blue"><img src="assets/art/fish-orange.png" alt="River Blue Fish"></div><div class="fish fish3 yellow"><img src="assets/art/fish-orange.png" alt="Golden Lotus Fish"></div><div class="fish fish4 rose"><img src="assets/art/fish-orange.png" alt="Rose Petal Fish"></div><div class="fish fish5 jade"><img src="assets/art/fish-orange.png" alt="Jade Garden Fish"></div><div class="fish fish6 violet"><img src="assets/art/fish-orange.png" alt="Moonlight Violet Fish"></div><span class="ripples ripple-one"></span><span class="ripples ripple-two"></span><div class="dock"><i></i><i></i></div><div class="rod ${f.stage}"><i class="reel"></i><i class="handle"></i></div><svg class="line" viewBox="0 0 1000 600" preserveAspectRatio="none"><path d="${linePath}"/></svg>
  ${companion(dialogue,f.stage==='caught'?'celebrating':f.stage==='waiting'?'speaking':'encouraging')}
  <div class="fishing-hud"><span>${icon('bait')}<small>Bait</small><b>${f.bait}</b></span><hr><span>${icon('star')}<small>Level</small><b>1</b></span></div>
  <button class="instruction ${f.stage}" data-cast><span>${icon(f.stage==='caught'?'spark':'hand')}</span><b>${instruction}</b></button>
@@ -207,7 +215,8 @@ document.addEventListener('click', e=>{
 
 function flipCard(i){ const m=state.memory;if(m.locked||m.open.includes(i)||m.matched.includes(i))return;m.open.push(i);render();if(m.open.length===2){m.moves++;m.locked=true;setTimeout(()=>{const[a,b]=m.open;if(flowers[a][0]===flowers[b][0])m.matched.push(a,b);m.open=[];m.locked=false;render();if(m.matched.length===flowers.length)setTimeout(()=>{app.insertAdjacentHTML('beforeend',modal('Wonderful work, Mary!','You found every flower pair. Take a moment to enjoy what you did.'));},300);},750);}}
 function hint(){ const m=state.memory;if(!m.hints)return;const first=flowers.findIndex((f,i)=>!m.matched.includes(i));const second=flowers.findIndex((f,i)=>i!==first&&!m.matched.includes(i)&&f[0]===flowers[first][0]);m.hints--;m.open=[first,second];m.locked=true;render();setTimeout(()=>{m.open=[];m.locked=false;render();},1200);}
-function advanceFishing(){const f=state.fishing;if(f.stage==='ready'){f.started=Date.now();f.stage='waiting';render();setTimeout(()=>{if(f.stage==='waiting'){f.stage='bite';render()}},3500)}else if(f.stage==='bite'){f.stage='left';render()}else if(f.stage==='left'){f.stage='right';render()}else if(f.stage==='right'){f.stage='reeling';f.progress=30;render()}else if(f.stage==='reeling'){f.progress+=35;if(f.progress>=100){f.progress=100;f.stage='caught';f.caught++;render()}else render()}else if(f.stage==='caught'){state.view='conversation';render()}}
+function chooseFish(){const multiplier=state.fishing.bait<3?2:1,weights=FISH_TYPES.map((fish,index)=>fish.rarity*(index?multiplier:1)),total=weights.reduce((a,b)=>a+b,0);let roll=Math.random()*total;for(let i=0;i<weights.length;i++){roll-=weights[i];if(roll<=0)return FISH_TYPES[i]}return FISH_TYPES[0]}
+function advanceFishing(){const f=state.fishing;if(f.stage==='ready'){f.started=Date.now();f.activeFish=chooseFish();f.stage='waiting';render();setTimeout(()=>{if(f.stage==='waiting'){f.stage='bite';render()}},2500+Math.random()*4500)}else if(f.stage==='bite'){f.stage='left';render()}else if(f.stage==='left'){f.stage='right';render()}else if(f.stage==='right'){f.stage='reeling';f.progress=30;render()}else if(f.stage==='reeling'){f.progress+=35;if(f.progress>=100){f.progress=100;f.stage='caught';f.caught++;render()}else render()}else if(f.stage==='caught'){state.view='conversation';render()}}
 
 function advanceTutorial(){state.tutorialFeedback=null;if(state.tutorialStep<3){state.tutorialStep++;render()}else{state.tutorialStep=0;state.fishing.stage='ready';if(state.controller)state.controllerStep='fishing';else state.view='fishing';render()}}
 function showTutorialSuccess(){if(state.tutorialFeedback?.kind==='correct')return;state.tutorialFeedback={kind:'correct',message:'That was the correct movement. Moving to the next step…'};render();setTimeout(advanceTutorial,1050)}

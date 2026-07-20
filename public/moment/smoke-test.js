@@ -50,6 +50,7 @@ expect(html("chooseFish().name")==='Grand Lake Carp','The third catch must guara
 vm.runInContext("state.session.error='Static preview';state.session.id=null",context);
 expect(html('pairing()').includes('Start without a phone'),'Static pairing failure must offer a playable demo path');
 expect(html('fishingIntro()').includes('data-demo-tutorial'),'Fishing introduction must expose a clear practice button');
+expect(html("window.speechSynthesis.getVoices=()=>[{name:'Basic Voice',lang:'en-US',localService:true},{name:'Ava Premium',lang:'en-AU',localService:true}];sunnyVoice().name")==='Ava Premium','Sunny must prefer a natural premium system voice');
 expect(!html('family()').includes('88%'),'Family view must not display percentage scores');
 vm.runInContext("state.controller=false;state.view='welcome';state.fishing.stage='caught';handleRemote('fish-again')",context);
 expect(html('state.fishing.stage')==='caught','Remote fishing actions must not mutate an unrelated view');

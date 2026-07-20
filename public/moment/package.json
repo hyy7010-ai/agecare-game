@@ -1,0 +1,10 @@
+{
+  "name": "moment-peaceful-fishing",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "tunnel": "npx ngrok http 4173",
+    "test": "node smoke-test.js"
+  }
+}

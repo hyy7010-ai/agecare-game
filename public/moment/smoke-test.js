@@ -47,6 +47,9 @@ expect(html('state.fishing.stage')==='biglift','A large visitor must enter the c
 expect(html('fishing()').includes('grand-shadow'),'A large visitor must render the special lake animation');
 vm.runInContext('state.fishing.caught=2',context);
 expect(html("chooseFish().name")==='Grand Lake Carp','The third catch must guarantee the magnificent visitor');
+vm.runInContext("state.session.error='Static preview';state.session.id=null",context);
+expect(html('pairing()').includes('Start without a phone'),'Static pairing failure must offer a playable demo path');
+expect(html('fishingIntro()').includes('data-demo-tutorial'),'Fishing introduction must expose a clear practice button');
 expect(!html('family()').includes('88%'),'Family view must not display percentage scores');
 vm.runInContext("state.controller=false;state.view='welcome';state.fishing.stage='caught';handleRemote('fish-again')",context);
 expect(html('state.fishing.stage')==='caught','Remote fishing actions must not mutate an unrelated view');

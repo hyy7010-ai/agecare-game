@@ -41,7 +41,12 @@ expect(relax.includes('breathing-orb')&&relax.includes('data-toggle-pause')&&rel
 expect(html("modal('Wonderful work','All flowers matched')").includes('data-restart'),'Memory completion must restart Memory');
 vm.runInContext("state.controller=true;state.controllerStep='tutorial';state.motion.enabled=false;state.tutorialStep=1",context);
 expect(html('phone()').includes('Phone movement is off on this link'),'Phone visual fallback must explain that motion is off');
-expect(html('FISH_TYPES.length')===6,'Fishing must expose six visitors');
+expect(html('FISH_TYPES.length')===7,'Fishing must expose seven visitors including the Grand Lake Carp');
+vm.runInContext("state.controller=false;state.view='fishing';state.fishing.activeFish=FISH_TYPES.find(fish=>fish.size==='large');state.fishing.struggle=['left','right'];state.fishing.stage='bite';advanceFishing()",context);
+expect(html('state.fishing.stage')==='biglift','A large visitor must enter the comfortable hold stage');
+expect(html('fishing()').includes('grand-shadow'),'A large visitor must render the special lake animation');
+vm.runInContext('state.fishing.caught=2',context);
+expect(html("chooseFish().name")==='Grand Lake Carp','The third catch must guarantee the magnificent visitor');
 expect(!html('family()').includes('88%'),'Family view must not display percentage scores');
 vm.runInContext("state.controller=false;state.view='welcome';state.fishing.stage='caught';handleRemote('fish-again')",context);
 expect(html('state.fishing.stage')==='caught','Remote fishing actions must not mutate an unrelated view');

@@ -49,6 +49,7 @@ vm.runInContext('state.fishing.caught=2',context);
 expect(html("chooseFish().name")==='Grand Lake Carp','The third catch must guarantee the magnificent visitor');
 vm.runInContext("state.session.error='Static preview';state.session.id=null",context);
 expect(html('pairing()').includes('Start without a phone'),'Static pairing failure must offer a playable demo path');
+expect(html('pairing()').includes('data-retry-pair'),'A temporary pairing failure must offer an immediate retry');
 expect(html('fishingIntro()').includes('data-demo-tutorial'),'Fishing introduction must expose a clear practice button');
 expect(html("window.speechSynthesis.getVoices=()=>[{name:'Basic Voice',lang:'en-US',localService:true},{name:'Ava Premium',lang:'en-AU',localService:true}];sunnyVoice().name")==='Ava Premium','Sunny must prefer a natural premium system voice');
 expect(!html('family()').includes('88%'),'Family view must not display percentage scores');

@@ -60,7 +60,7 @@ function shell(content, cls=''){ return `<main class="shell ${cls}">${content}</
 function todayLabel(){return new Intl.DateTimeFormat(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date())}
 
 function welcome(){
- const remembered=state.greeting?.personalized,stateGreeting=remembered?state.greeting.greeting:`Hello, ${state.name}.`,stateSuggestion=remembered?state.greeting.suggestion:'I’m here to keep you company today. ♡';
+ const remembered=state.greeting?.personalized,stateGreeting=remembered?state.greeting.greeting:`Hello, ${state.name}.`,stateSuggestion=remembered?state.greeting.suggestion:'I’m here to keep you company today.';
  return `<main class="home-dashboard">
   <nav class="dashboard-nav"><button class="dashboard-brand" data-go="welcome">${icon('flower')}<span><b>MOMENT</b><small>Your companion, every day.</small></span></button><div><button class="active" data-go="welcome">${icon('star')} Home</button><button data-go="activities">${icon('flower')} Activities</button><button data-go="daily">${icon('lotus')} Reports</button><button data-go="family">${icon('hand')} Family</button></div><button class="dashboard-controller" data-controller>${icon('hand')} Phone controller <i></i></button></nav>
   <section class="dashboard-stage"><div class="dashboard-copy"><h1>Good afternoon,<br>${state.name}</h1><p>Let’s make today a wonderful day. <span>♡</span></p></div>
@@ -113,7 +113,15 @@ const experiences = {
  talk:{kicker:'A CONVERSATION WITH SUNNY',title:'I’m here to listen',body:'Share a story, remember someone special, or simply talk about your day. This is your space.',cards:[['♡','A favourite family tradition'],['♫','Music that brings back memories'],['☕','The best part of today'],['▧','Tell me about this photo']]},
  relax:{kicker:'A PEACEFUL PAUSE',title:'Let’s make room to breathe',body:'Settle into a calming sound, a gentle breathing moment, or a quiet nature scene.',cards:[['🌧️','Soft rain on leaves'],['🌊','Waves along the shore'],['🎹','Quiet afternoon piano']]}
 };
-function experience(type){ const x=experiences[type]; return `${nav()}${shell(`<div class="page-heading">${back()}<span><span class="eyebrow">${x.kicker}</span><h1>${x.title}</h1><p>${x.body}</p></span></div><div class="experience-hero ${type}">${companion(type==='talk'?`What’s on your mind, ${state.name}?`:`We can enjoy this together.`,'speaking')}<div class="orb">${icons[type]}</div></div><div class="story-cards">${x.cards.map((c,i)=>`<button data-story="${type}:${i}"><span>${c[0]}</span><b>${c[1]}</b><small>${i?'About 5 minutes':'Recommended for you'} · Start this moment →</small></button>`).join('')}</div>`, 'page')}`; }
+function experience(type){ const x=experiences[type]; return `${nav()}${shell(`<div class="page-heading experience-heading">${back()}<span><span class="eyebrow">${x.kicker}</span><h1>${x.title}</h1><p>${x.body}</p></span></div><div class="experience-hero ${type}">${companion(type==='talk'?`What’s on your mind, ${state.name}?`:`We can enjoy this together.`,'speaking')}<div class="orb">${icons[type]}</div></div><div class="story-cards ${x.cards.length===4?'four':''}">${x.cards.map((c,i)=>`<button data-story="${type}:${i}"><span>${c[0]}</span><b>${c[1]}</b><small>${i?'About 5 minutes':'Recommended for you'}</small><strong>Start this moment →</strong></button>`).join('')}</div>`, 'page experience-page')}`; }
+
+function startMoment(type,index){
+ state.momentSelection={type,index:+index};
+ state.moment={step:0,started:Date.now(),paused:false,messages:[],busy:false,completed:false,photo:null,photoBusy:false};
+ state.previous=type;
+ state.view='momentPlaying';
+ render();
+}
 
 function guidedMoment(){const {type,index}=state.momentSelection;const x=experiences[type],item=x.cards[index];const copy={explore:['Let’s look around together','Sunny will gently guide you through the scene. Pause whenever something catches your eye.'],talk:['This is your space','Share as much or as little as you like. Sunny will listen without rushing you.'],relax:['Settle in comfortably','Breathe naturally and let the sound create a quiet moment around you.']}[type];return shell(`<div class="guided-moment ${type}">${sun('speaking')}<span class="eyebrow">${type.toUpperCase()} WITH SUNNY</span><h1>${item[1]}</h1><p class="lead">${copy[0]}</p><div class="guided-panel"><div class="guided-visual">${icons[type]}<i></i><i></i><i></i></div><div><h2>${copy[1]}</h2><p>This moment is about five minutes. There is no rush and nothing you need to finish.</p><div class="guided-actions">${button('Begin this moment',null,'primary','data-begin-moment')}${button('Choose another',type,'secondary')}</div></div></div></div>`, 'state-shell guided-shell')}
 
@@ -233,7 +241,7 @@ document.addEventListener('click', e=>{
  if(e.target.closest('[data-bait]')){useBait();return;}
  if(e.target.closest('[data-sound]')){state.settings.sound=!state.settings.sound;if(!state.settings.sound&&'speechSynthesis'in window)window.speechSynthesis.cancel();toast(state.settings.sound?'Sunny’s spoken guidance is on':'Spoken guidance is paused');render();return;}
  const t=e.target.closest('[data-toast]'); if(t) toast(t.dataset.toast);
- const story=e.target.closest('[data-story]');if(story){const [type,index]=story.dataset.story.split(':');state.momentSelection={type,index:+index};state.previous=type;state.view='guidedMoment';render();return;}
+ const story=e.target.closest('[data-story]');if(story){const [type,index]=story.dataset.story.split(':');startMoment(type,index);return;}
  const begin=e.target.closest('[data-begin-moment]');if(begin){state.moment={step:0,started:Date.now(),paused:false,messages:[],busy:false,completed:false,photo:null,photoBusy:false};state.view='momentPlaying';render();return;}
  const momentChoice=e.target.closest('[data-moment-choice]');if(momentChoice){toast(`A lovely choice: ${momentChoice.dataset.momentChoice}`);if(state.moment.step<2){state.moment.step++;render()}else completeMoment();return;}
  const momentPrompt=e.target.closest('[data-moment-prompt]');if(momentPrompt){submitMomentTalk(momentPrompt.dataset.momentPrompt==='family'?'I would like to remember a happy family moment.':'I would like to share something about today.');return;}

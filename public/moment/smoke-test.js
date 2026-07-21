@@ -18,11 +18,14 @@ const context={
 };
 context.window.window=context.window;
 vm.createContext(context);
-vm.runInContext(fs.readFileSync('app-interactive.js','utf8'),context);
+vm.runInContext(fs.readFileSync(fs.existsSync('app.js')?'app.js':'app-interactive.js','utf8'),context);
 
 function expect(condition,message){if(!condition)throw new Error(message)}
 function html(expression){return vm.runInContext(expression,context)}
 
+vm.runInContext("startMoment('explore',0)",context);
+expect(html('state.view')==='momentPlaying','An Explore card must start the real experience in one click');
+expect(appNode.innerHTML.includes('data-moment-choice'),'The one-click Explore start must render playable choices');
 vm.runInContext("state.momentSelection={type:'explore',index:0};state.moment={step:0,started:Date.now(),paused:false,messages:[],busy:false}",context);
 expect(html('momentPlaying()').includes('data-moment-choice'),'Explore must offer real choices');
 vm.runInContext('state.moment.step=2',context);
